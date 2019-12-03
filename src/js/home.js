@@ -39,7 +39,7 @@ const getUser = new Promise(function(todoBien, todoMal) {
     console.log(message);
   });
 
-fetch('https://randomuser.me/api/ddfgdfg')
+fetch('https://randomuser.me/api/')
   .then(function(response) {
     console.log(response)
     return response.json()
@@ -49,4 +49,17 @@ fetch('https://randomuser.me/api/ddfgdfg')
   })
   .catch(function() {
     console.log('algo falló en mi corazoooon');
-  })
+  });
+
+  (async function load() {
+    async function getData(url) {
+      const response = await fetch(url);
+      const data = await response.json();
+      return data;
+    } 
+    const actionList = await getData('https://yts.lt/api/v2/list_movies.json?genre=action');  
+    const dramaList = await getData('https://yts.lt/api/v2/list_movies.json?genre=drama');  
+    const animationList = await getData('https://yts.lt/api/v2/list_movies.json?genre=animation');  
+    console.log(actionList, dramaList, animationList);
+    
+  })()
