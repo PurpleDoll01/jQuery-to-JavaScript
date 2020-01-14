@@ -112,9 +112,9 @@ fetch('https://randomuser.me/api/')
     const animationList = await getData('https://yts.lt/api/v2/list_movies.json?genre=animation');  
     console.log(actionList, dramaList, animationList); 
 
-    function videoItemTemplate(movie) {
+    function videoItemTemplate(movie, category) {
       return (
-        `<div class="primaryPlaylistItem">
+        `<div class="primaryPlaylistItem" data-id="${movie.id}" data-category="${category}">
         <div class="primaryPlaylistItem-image">
           <img src="${movie.medium_cover_image}">
         </div>
@@ -133,14 +133,14 @@ fetch('https://randomuser.me/api/')
 
     function addEventClick($element) {
       $element.addEventListener('click', () => {
-        showModal();
+        showModal($element);
       })
     }
 
-    function renderMovieList(list, $container) {
+    function renderMovieList(list, $container, category) {
       $container.children[0].remove();
       list.forEach((movie) => {
-        const HTMLString = videoItemTemplate(movie);
+        const HTMLString = videoItemTemplate(movie, category);
         const movieElement = createTemplate(HTMLString);
         $container.append(movieElement);
         addEventClick(movieElement);
@@ -151,9 +151,9 @@ fetch('https://randomuser.me/api/')
     const $dramaContainer = document.getElementById('dramita');
     const $animationContainer = document.getElementById('animation');
 
-    renderMovieList(actionList.data.movies, $actionContainer);
-    renderMovieList(dramaList.data.movies, $dramaContainer);
-    renderMovieList(animationList.data.movies, $animationContainer);
+    renderMovieList(actionList.data.movies, $actionContainer, 'action');
+    renderMovieList(dramaList.data.movies, $dramaContainer, 'drama');
+    renderMovieList(animationList.data.movies, $animationContainer, 'animation');
 
     const $modal = document.getElementById('modal');
     const $overlay = document.getElementById('overlay');
@@ -163,7 +163,7 @@ fetch('https://randomuser.me/api/')
     const $modalImage = $modal.querySelector('img');
     const $modalDescription = $modal.querySelector('p');
 
-    function showModal() {
+    function showModal($element) {
       $overlay.classList.add('active');
       $modal.style.animation = 'modalIn .8s forwards';
     }
