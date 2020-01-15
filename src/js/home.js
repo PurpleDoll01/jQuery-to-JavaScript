@@ -105,12 +105,7 @@ fetch('https://randomuser.me/api/')
       } = await getData(`${BASE_API}list_movies.json?limit=1&query_term=${data.get('name')}`)
       const HTMLString = featuringTemplate(pelis[0]);
       $featuringContainer.innerHTML = HTMLString;
-    })
-
-    const { data: { movies: actionList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=action');  
-    const { data: { movies: dramaList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=drama');  
-    const { data: { movies: animationList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=animation');  
-    console.log(actionList, dramaList, animationList); 
+    }) 
 
     function videoItemTemplate(movie, category) {
       return (
@@ -132,7 +127,6 @@ fetch('https://randomuser.me/api/')
     }
 
     function addEventClick($element) {
-      debugger
       $element.addEventListener('click', () => {
         showModal($element);
       })
@@ -144,16 +138,24 @@ fetch('https://randomuser.me/api/')
         const HTMLString = videoItemTemplate(movie, category);
         const movieElement = createTemplate(HTMLString);
         $container.append(movieElement);
+        const image = movieElement.querySelector('img');
+        image.addEventListener('load', () => {
+          image.classList.add('fadeIn');
+        })
         addEventClick(movieElement);
       })
     }
 
+    const { data: { movies: actionList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=action');  
     const $actionContainer = document.querySelector('#action');
-    const $dramaContainer = document.getElementById('dramita');
-    const $animationContainer = document.getElementById('animation');
-
     renderMovieList(actionList, $actionContainer, 'action');
+
+    const { data: { movies: dramaList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=drama');  
+    const $dramaContainer = document.getElementById('dramita');
     renderMovieList(dramaList, $dramaContainer, 'drama');
+ 
+    const { data: { movies: animationList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=animation');
+    const $animationContainer = document.getElementById('animation');
     renderMovieList(animationList, $animationContainer, 'animation');
 
     const $modal = document.getElementById('modal');
