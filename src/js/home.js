@@ -55,7 +55,10 @@ fetch('https://randomuser.me/api/')
     async function getData(url) {
       const response = await fetch(url);
       const data = await response.json();
-      return data;
+      if (data.data.movie_count > 0) {
+        return data; 
+      }
+      throw new Error('No se encontró ningún resultado');
     } 
 
     const $form = document.getElementById('form'); 
@@ -98,13 +101,19 @@ fetch('https://randomuser.me/api/')
       $featuringContainer.append($loader);
 
       const data = new FormData($form);
-      const {
-        data: {
-          movies: pelis
-        }        
-      } = await getData(`${BASE_API}list_movies.json?limit=1&query_term=${data.get('name')}`)
-      const HTMLString = featuringTemplate(pelis[0]);
-      $featuringContainer.innerHTML = HTMLString;
+      try {
+        const {
+          data: {
+            movies: pelis
+          }        
+        } = await getData(`${BASE_API}list_movies.json?limit=1&query_term=${data.get('name')}`)
+        const HTMLString = featuringTemplate(pelis[0]);
+        $featuringContainer.innerHTML = HTMLString;
+      } catch(error) {
+        alert(error.message);
+        $loader.remove();
+        $home.classList.remove('search-active');
+      }    
     }) 
 
     function videoItemTemplate(movie, category) {
@@ -146,15 +155,27 @@ fetch('https://randomuser.me/api/')
       })
     }
 
-    const { data: { movies: actionList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=action');  
+    async function cacheExist(category) {
+      const listName = `${category}List`;
+      const cacheList =  window.localStorage.getItem(listName);
+      if (cacheList) {
+        return JSON.parse(cacheList);
+      }
+      const { data: { movies: data}} = await getData(`https://yts.lt/api/v2/list_movies.json?genre=${category}`);  
+      window.localStorage.setItem(listName, JSON.stringify(data));
+      return data;
+    }
+
+    //const { data: { movies: actionList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=action');  
+    const actionList = await cacheExist('action');
     const $actionContainer = document.querySelector('#action');
     renderMovieList(actionList, $actionContainer, 'action');
 
-    const { data: { movies: dramaList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=drama');  
+    const dramaList = await cacheExist('drama');
     const $dramaContainer = document.getElementById('dramita');
     renderMovieList(dramaList, $dramaContainer, 'drama');
  
-    const { data: { movies: animationList}} = await getData('https://yts.lt/api/v2/list_movies.json?genre=animation');
+    const animationList = await cacheExist('animation');
     const $animationContainer = document.getElementById('animation');
     renderMovieList(animationList, $animationContainer, 'animation');
 
